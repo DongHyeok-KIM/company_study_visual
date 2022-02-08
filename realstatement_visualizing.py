@@ -51,9 +51,10 @@ class Realstatement_visualizing:
         president_data = self.president_data_preprocessing(self.load_csv_file('역대성향별정권'))
         df = pd.merge(president_data, df)
         df = df.melt(id_vars=df.columns[:3], value_vars=df.columns[3:],var_name='구분', value_name='값')
+        print(df.head())
         df['구분'] = df['구분'].apply(lambda x: x.replace("[%]", ""))
         df['구분'] = df['구분'].apply(lambda x: x.replace("[백만원]", ""))
-        df['구분'] = df['구분'].apply(lambda x: x.replace("[2019.01 = 100]", ""))
+        df['구분'] = df['구분'].apply(lambda x: x.replace("[2019.01=100]", ""))
         if df['값'].max()>1000000:
             df['값'] = df['값'].apply(lambda x:x/1000000)
         df.rename(columns={'값':f'{self.ytic_name}'},inplace=True)
@@ -128,7 +129,7 @@ class Realstatement_visualizing:
             self.main = '총지수'
             self.sub = ['단독주택','연립주택','아파트']
             self.ytic_name = '매매지수(2019.01=100)'
-        elif file_name == '지가변동률':
+        elif file_name == '지역별_지가변동률':
             self.main = '전국'
             self.sub = ['서울', '경기', '제주']
             self.ytic_name = '변동률(%)'
