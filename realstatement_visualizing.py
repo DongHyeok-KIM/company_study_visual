@@ -135,7 +135,7 @@ class Realstatement_visualizing:
             self.ytic_name = '변동률(%)'
         #return file_name, ytic_name, main, sub
 
-    def triple_grap(self):
+    def triple_grap(self, ax2_start_day,ax2_end_day, ax3_start_day,):
         df = self.load_csv_file(self.file_name)
         self.ytic_main_sub_choice(self.file_name)
         df = self.data_preprocessing(df)
