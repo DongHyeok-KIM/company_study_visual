@@ -12,3 +12,8 @@ presidents_inaug_dates = {
 전국매매지수 = ['단독주택','연립주택','아파트']
 서울매매지수 = ['아파트(서울)']
 지가변동률 = ['서울','경기','제주']
+
+title_font = {'family': 'AppleGothic', 'color': 'black', 'weight': 'bold',
+        'size': 16,}
+tick_font = {'family': 'AppleGothic', 'color': 'b', 'weight': 'bold',
+        'size': 14, 'alpha': 0.5, 'rotation': 45}
