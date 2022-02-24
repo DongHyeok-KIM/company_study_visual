@@ -16,4 +16,4 @@ presidents_inaug_dates = {
 title_font = {'family': 'AppleGothic', 'color': 'black', 'weight': 'bold',
         'size': 16,}
 tick_font = {'family': 'AppleGothic', 'color': 'b', 'weight': 'bold',
-        'size': 14, 'alpha': 0.5, 'rotation': 45}
+        'size': 14, 'alpha': 1 }
