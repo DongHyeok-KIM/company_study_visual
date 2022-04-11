@@ -4,7 +4,6 @@ from matplotlib import font_manager, rc
 import matplotlib.pyplot as plt
 import seaborn as sns
 import platform
-import matplotlib.dates as mdates
 from dateutil.relativedelta import relativedelta
 from matplotlib.transforms import Bbox, TransformedBbox, blended_transform_factory
 from mpl_toolkits.axes_grid1.inset_locator import BboxPatch, BboxConnector,\
@@ -20,7 +19,6 @@ class Realstatement_visualizing:
         self.sub : list
         self.ytic_name : str
         self.file_name : str
-        self.ylim : list
         plt.rcParams['axes.unicode_minus']= False
         if platform.system() == 'Darwin': #맥os 사용자의 경우
             plt.style.use('seaborn-whitegrid')
@@ -53,10 +51,10 @@ class Realstatement_visualizing:
         president_data = self.president_data_preprocessing(self.load_csv_file('역대성향별정권'))
         df = pd.merge(president_data, df)
         df = df.melt(id_vars=df.columns[:3], value_vars=df.columns[3:],var_name='구분', value_name='값')
+        print(df.head())
         df['구분'] = df['구분'].apply(lambda x: x.replace("[%]", ""))
         df['구분'] = df['구분'].apply(lambda x: x.replace("[백만원]", ""))
         df['구분'] = df['구분'].apply(lambda x: x.replace("[2019.01=100]", ""))
-        df['구분'] = df['구분'].apply(lambda x: x.replace("[호]",""))
         if df['값'].max()>1000000:
             df['값'] = df['값'].apply(lambda x:x/1000000)
         df.rename(columns={'값':f'{self.ytic_name}'},inplace=True)
@@ -76,28 +74,19 @@ class Realstatement_visualizing:
             plt.axvline(inaug_date, linestyle='--', color='black')
             plt.text(inaug_date + relativedelta(years=y, month=m), y=max_value, s=president, fontsize=11)
 
-    def lineplot_presidentline(self, df, main,sub):
-        temp_list = [main]
-        temp_list.extend(sub)
-        temp_df = df.query('구분 ==@temp_list')
-        sns.lineplot(data=temp_df, x='년월', y=f'{self.ytic_name}', hue='구분')
-        self.ylim = [int(plt.ylim()[0]), int(plt.ylim()[1])]
-        temp_df = df.query('구분 == @main')
+    def lineplot_presidentline(self, df, name):
+        temp_df = df.query('구분 == @name')
         max_value = temp_df[f'{self.ytic_name}'].max() * 0.95
         sns.lineplot(data=temp_df, x='년월', y=f'{self.ytic_name}', hue='구분')
-        plt.xlabel(None)
-        plt.ylim(self.ylim)
         plt.title(f'{self.file_name}({self.main})_시각화 그래프', fontsize=20, fontweight='bold')
         plt.legend(loc='upper left', bbox_to_anchor=(0.05, 0.9))
         self.presidentline(presidents_inaug_dates, max_value)
 
-    def lineplot(self, df, sub,구간 ):
-        temp_df = df.query('구분 in @sub')
+    def lineplot(self, df, 리스트, title):
+        temp_df = df.query('구분 in @ 리스트')
         sns.lineplot(data=temp_df, x='년월', y=f'{self.ytic_name}', hue='구분')
-        plt.ylim(self.ylim)
-        plt.title(f'비교 {구간}구간 상세', fontsize=15, fontweight='bold')
+        plt.title(f'{title} 상세', fontsize=15, fontweight='bold')
         plt.xticks(rotation=45)
-        #plt.xlabel(None)
 
     def connect_bbox(self, bbox1, bbox2,loc1a, loc2a, loc1b, loc2b,prop_lines, prop_patches=None):
         if prop_patches is None:
@@ -144,38 +133,22 @@ class Realstatement_visualizing:
             self.main = '전국'
             self.sub = ['서울', '경기', '제주']
             self.ytic_name = '변동률(%)'
-        elif file_name == '주택건설인허가실적':
-            self.main = '전국'
-            self.sub = ['서울', '경기', '제주']
-            self.ytic_name = '호'
         #return file_name, ytic_name, main, sub
 
-    def triple_grap(self, data):
-        #ax2_start_day, ax2_end_day, ax3_start_day,
+    def triple_grap(self, ax2_start_day,ax2_end_day, ax3_start_day,):
         df = self.load_csv_file(self.file_name)
         self.ytic_main_sub_choice(self.file_name)
         df = self.data_preprocessing(df)
         #main, sub = self.main_sub_choice(self.file_name)
         plt.figure(figsize=(15, 10))
         ax1 = plt.subplot(2, 1, 1)
-        self.lineplot_presidentline(df, self.main, self.sub)
-        day_format=self.change_xticks('%Y.%m')
-        ax1.xaxis.set_major_formatter(day_format)
+        self.lineplot_presidentline(df, self.main)
         ax2 = plt.subplot(2, 2, 3)
-        self.lineplot(df.query(f'"{data[0]}" <= 년월 < "{data[1]}"'), self.sub, '1')
-        ax2.xaxis.set_major_formatter(day_format)
+        self.lineplot(df.query(f'"2008-03-01" <= 년월 < "2013-03-01"'), self.sub, '이명박임기')
         self.zoom_effect(ax2, ax1)
         ax3 = plt.subplot(2, 2, 4)
-        ax3.xaxis.set_major_formatter(day_format)
-        self.lineplot(df.query(f'"{data[2]}" <= 년월<"{data[3]}"'), self.sub, '2')
+        self.lineplot(df.query(f'"2017-05-01" <= 년월'), self.sub, '문재인임기')
         self.zoom_effect(ax3, ax1)
         return plt
 
-    def make_day_dict(self,day_list):
-        result = dict(zip([i for i in range(len(day_list))],day_list))
-        return result
-    def change_xticks(self,day_format):
-        #'%Y.%m.%d'
-        day_format = mdates.DateFormatter(day_format)
-        return day_format
-        #ax.xaxis.set_major_formatter(dateFmt)
+
